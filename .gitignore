@@ -1,0 +1,64 @@
+# ==============================================================================
+# Environment Variables & Secrets (CRITICAL for security & deployment)
+# ==============================================================================
+.env
+.env.*
+!.env.example
+*.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ==============================================================================
+# Node & Frontend Build Artifacts
+# ==============================================================================
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Test & Coverage Artifacts
+test-results/
+playwright-report/
+.last-run.json
+
+# ==============================================================================
+# MATLAB Artifacts & Temporary Files
+# ==============================================================================
+*.asv
+*.m~
+_temp_*
+retinoxai_debug.log
+slprj/
+*.slxc
+*.autosave
+
+# ==============================================================================
+# Unused / Deprecated Model Weights
+# (Frozen config uses resnet50 and efficientnetB5 only)
+# ==============================================================================
+main_model/ada/efficientnetB5_processed_weighted.mat
+
+# ==============================================================================
+# OS & Editor Files
+# ==============================================================================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
