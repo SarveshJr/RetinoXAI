@@ -28,9 +28,21 @@ import { DEMO_PATIENTS } from '@/lib/demoData'
 import { GRADES, type DRGrade, type Eye as EyeSide, type FundaQResult, type PatientRef, type ScreeningResult } from '@/lib/clinical'
 import { screen } from '@/lib/api'
 import { analyzeFundaQ } from '@/lib/imageQuality'
+import { sampleFundus } from '@/lib/fundusSamples'
 import { useAppStore } from '@/store/useAppStore'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+
+async function urlToBase64(url: string): Promise<string> {
+  const res = await fetch(url)
+  const blob = await res.blob()
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(reader.result as string)
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
+}
 
 type Phase = 'idle' | 'running' | 'done'
 
@@ -115,17 +127,33 @@ export function ScreeningPage() {
     pendingResult.current = null
     const p: PatientRef = patient
 
-    // Reuse the FundaQ-8 result already computed by the quality gate on upload.
-    const r = await screen({
-      patient: p,
-      eye,
-      imageBase64: mode === 'upload' ? uploaded ?? undefined : undefined,
-      targetGrade: mode === 'sample' && sampleGrade !== 'auto' ? sampleGrade : undefined,
-      quality: mode === 'upload' ? quality ?? undefined : undefined,
-    })
-    pendingResult.current = r
-    setRealTimings(r.timings)
-    setBackendDone(true) // gates the pipeline runner's final completion
+    let imageBase64 = mode === 'upload' ? uploaded ?? undefined : undefined
+    if (mode === 'sample') {
+      try {
+        const sampleUrl = sampleFundus(patient.id + eye, sampleGrade === 'auto' ? 0 : sampleGrade)
+        imageBase64 = await urlToBase64(sampleUrl)
+      } catch {
+        // continue if image asset load fails
+      }
+    }
+
+    try {
+      const r = await screen({
+        patient: p,
+        eye,
+        imageBase64,
+        targetGrade: mode === 'sample' && sampleGrade !== 'auto' ? sampleGrade : undefined,
+        quality: mode === 'upload' ? quality ?? undefined : undefined,
+      })
+      pendingResult.current = r
+      setRealTimings(r.timings)
+      setBackendDone(true) // gates the pipeline runner's final completion
+    } catch (err) {
+      setPhase('idle')
+      toast.error('MATLAB Inference Error', {
+        description: (err as Error).message || 'Failed to communicate with MATLAB backend',
+      })
+    }
   }
 
   function finalize() {

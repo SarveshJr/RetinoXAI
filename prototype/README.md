@@ -26,7 +26,7 @@ prototype/
 | **New Screening** | Upload/select a fundus → animated 9-stage pipeline → grade + calibrated confidence + Grad-CAM++ + rule cross-check |
 | **Case Review** | Layered fundus viewer (original / enhanced / segmentation / Grad-CAM++), ensemble distribution, FundaQ-8 breakdown, ICDR 4:2:1 quadrant map, lesion evidence, **doctor sign-off** (human-in-the-loop), printable report |
 | **Worklist** | Priority-sorted patient queue (referable first), filters, teleconsult referral |
-| **Analytics** | MATLAB–Simulink digital twin (62 patients/hr, ~524/8h, turnaround), bandwidth/connectivity model, district-scale planner (100k+/yr), confusion matrix, ensemble-vs-single ablation, weight/threshold tuning |
+| **Analytics** | MATLAB–Simulink digital twin (40 patients/hr, ~320/8h, 100s sequential: 10s AI + 90s doctor review), bandwidth/connectivity model, district-scale planner (100k+/yr), confusion matrix, ensemble-vs-single ablation, weight/threshold tuning |
 | **Pipeline & Model** | Full architecture, ensemble composition, datasets, MATLAB toolboxes, frozen config |
 
 The interface also ships a ⌘K command palette (navigate + patient search), animated
@@ -123,4 +123,4 @@ ML, Simulink (SimEvents for the digital twin).
 5. **Simulink workflow simulation** — digital twin covering acquisition rates,
    **bandwidth constraints** (offline-first buffer + sync), processing throughput
    and review capacity, with a **district-scale planner** optimising resource
-   allocation for 100,000+ patients/year (62 patients/hr, ~524 per 8-hour session).
+   allocation for 100,000+ patients/year (40 patients/hr, ~320 per 8-hour session; 10s AI + 90s doctor review = 100s total sequential).

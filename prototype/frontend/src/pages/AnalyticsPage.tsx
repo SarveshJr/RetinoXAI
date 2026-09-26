@@ -45,9 +45,9 @@ export function AnalyticsPage() {
       const arrivals = Math.round(3600 / DIGITAL_TWIN.arrivalIntervalSec + (rng() - 0.5) * 3)
       const cleared = Math.min(arrivals + queue, DIGITAL_TWIN.patientsPerHour + Math.round((rng() - 0.5) * 4))
       queue = Math.max(0, queue + arrivals - cleared)
-      // turnaround: AI (15-20s) auto-cleared, + review (120s) for flagged share
+      // turnaround: AI (10s) auto-cleared, + review (90s) for flagged share (sequential: 100s)
       const flaggedShare = 0.28 + (rng() - 0.5) * 0.06
-      const turnaround = Math.round(18 + flaggedShare * DIGITAL_TWIN.reviewAvgSec)
+      const turnaround = Math.round(DIGITAL_TWIN.aiProcessingSec + flaggedShare * DIGITAL_TWIN.reviewAvgSec)
       return { hour: `${9 + i}:00`, arrivals, cleared, queue, turnaround }
     })
   }, [])
@@ -63,7 +63,7 @@ export function AnalyticsPage() {
     return Array.from({ length: DIGITAL_TWIN.sessionHours }, (_, i) => {
       // rural uplink: low mid-morning, recovers later
       const bw = Math.max(0.2, 2.4 + Math.sin((i - 1) / 1.5) * 1.8 + (rng() - 0.5) * 0.5)
-      const generated = sim[i]?.cleared ?? 60 // one report per cleared patient
+      const generated = sim[i]?.cleared ?? 40 // one report per cleared patient
       const syncCapacity = Math.round(bw * 22) // reports/hr the link can push (~1.6 Mbit each)
       const synced = Math.min(backlog + generated, syncCapacity)
       backlog = Math.max(0, backlog + generated - synced)
@@ -119,9 +119,9 @@ export function AnalyticsPage() {
               </div>
               <div className="space-y-3">
                 <SimParam icon={Users} label="Patient arrival" value={`1 every ${DIGITAL_TWIN.arrivalIntervalSec}s`} />
-                <SimParam icon={Cpu} label="AI inference" value={`${DIGITAL_TWIN.aiProcessingSecMin}–${DIGITAL_TWIN.aiProcessingSecMax}s`} />
-                <SimParam icon={Stethoscope} label="Doctor review" value={`${DIGITAL_TWIN.reviewSecMin}–${DIGITAL_TWIN.reviewSecMax}s`} />
-                <SimParam icon={Timer} label="Avg turnaround" value={`${avgTurnaround}s / patient`} />
+                <SimParam icon={Cpu} label="AI inference" value={`${DIGITAL_TWIN.aiProcessingSec}s / patient`} />
+                <SimParam icon={Stethoscope} label="Doctor review" value={`${DIGITAL_TWIN.reviewAvgSec}s / patient`} />
+                <SimParam icon={Timer} label="Total sequential" value={`${DIGITAL_TWIN.sequentialSec}s / patient`} />
                 <SimParam icon={Gauge} label="Sustained rate" value={`${DIGITAL_TWIN.patientsPerHour} patients/hr`} highlight />
               </div>
             </div>
@@ -300,7 +300,7 @@ function DistrictPlanner() {
             <Label className="text-xs text-muted-foreground">Patients / unit / day</Label>
             <span className="tabular text-sm font-medium text-primary">{perDay}</span>
           </div>
-          <Slider value={[perDay]} onValueChange={(v) => setPerDay(v[0])} min={100} max={525} step={25} />
+          <Slider value={[perDay]} onValueChange={(v) => setPerDay(v[0])} min={100} max={400} step={20} />
         </div>
         <p className="text-xs text-muted-foreground">
           At the Simulink-validated {DIGITAL_TWIN.patientsPerHour}/hr, {DISTRICT.defaultUnits} units clear the

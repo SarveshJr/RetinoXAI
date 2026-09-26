@@ -146,7 +146,7 @@ export const ABLATION = [
 /** District-scale resource-allocation planning (point 5: 100,000+ patients/yr). */
 export const DISTRICT = {
   target: 100000, // patients screened per year (district-level program)
-  patientsPerUnitPerDay: 500, // camp/ambulance day at Simulink-validated throughput
+  patientsPerUnitPerDay: 320, // camp/ambulance day at 8-hour capacity (40 patients/hr)
   workingDaysPerYear: 260,
   defaultUnits: 10,
 } as const
@@ -277,21 +277,23 @@ export const PIPELINE_STAGES: PipelineStageDef[] = [
 /** MATLAB SimEvents digital-twin figures (impact slide + Simulink model). */
 export const DIGITAL_TWIN = {
   sessionHours: 8,
-  arrivalIntervalSec: 55,
-  aiProcessingSecMin: 5,
+  arrivalIntervalSec: 90,
+  aiProcessingSec: 10,
+  aiProcessingSecMin: 10,
   aiProcessingSecMax: 10,
-  reviewSecMin: 60,
-  reviewSecMax: 180,
-  patientsPerHour: 62,
-  totalHandledMin: 523,
-  totalHandledMax: 525,
+  reviewSecMin: 90,
+  reviewSecMax: 90,
+  reviewAvgSec: 90,
+  sequentialSec: 100,
+  patientsPerHour: 40,
+  totalHandledMin: 310,
+  totalHandledMax: 320,
   costPerScreenMin: 130,
   costPerScreenMax: 150,
   hospitalCostMin: 900,
   hospitalCostMax: 1800,
-  turnaroundSecMin: 15,
-  turnaroundSecMax: 20,
-  reviewAvgSec: 120,
+  turnaroundSecMin: 10,
+  turnaroundSecMax: 100,
 } as const
 
 export type DecisionStatus = 'ai-cleared' | 'flagged' | 'signed-off' | 'recapture'

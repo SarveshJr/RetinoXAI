@@ -71,7 +71,7 @@ elsewhere.
 ## Notes
 
 - Single-threaded (one request at a time) — sufficient for camp-scale demo and
-  for the Simulink-validated 62 patients/hour throughput.
+  for the Simulink-validated 40 patients/hour throughput.
 - The `.mat` files store MATLAB `DAGNetwork`/`dlnetwork` objects, which execute
   only inside MATLAB — this is why the inference backend is MATLAB, per the
   problem statement's MATLAB pipeline requirement.

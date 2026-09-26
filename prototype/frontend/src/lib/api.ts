@@ -10,6 +10,8 @@ import { simulateScreening } from './mockEngine'
 
 const BASE = import.meta.env.VITE_API_BASE ?? '/api'
 const HEALTH_TIMEOUT = 1500
+export const STRICT_MATLAB_MODE =
+  import.meta.env.VITE_STRICT_MATLAB === 'true' || import.meta.env.VITE_STRICT_MATLAB === '1'
 
 export interface BackendHealth {
   status: 'online' | 'offline'
@@ -86,7 +88,10 @@ export async function screen(req: ScreenRequest): Promise<ScreeningResult> {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(req),
       })
-      if (!res.ok) throw new Error('screen failed')
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '')
+        throw new Error(`MATLAB backend error (${res.status}): ${errText || res.statusText}`)
+      }
       const data = (await res.json()) as ScreeningResult
       // The client-computed FundaQ-8 is the single source of truth for quality
       // (it drives the on-screen gate), so the result always matches the gate
@@ -107,9 +112,16 @@ export async function screen(req: ScreenRequest): Promise<ScreeningResult> {
         decision,
         confidence: presentConfidence(data.confidence),
       }
-    } catch {
+    } catch (err) {
+      if (STRICT_MATLAB_MODE) {
+        throw err
+      }
       // fall through to simulation
     }
+  } else if (STRICT_MATLAB_MODE) {
+    throw new Error(
+      `Strict MATLAB Mode: MATLAB engine is offline or unreachable at ${BASE}. Please start RetinoXAIServer(8080) in MATLAB.`
+    )
   }
   const result = simulateScreening(
     req.patient,

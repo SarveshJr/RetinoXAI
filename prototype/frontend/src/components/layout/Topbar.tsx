@@ -4,7 +4,7 @@ import { Menu, Moon, Sun, WifiOff, Cpu, Plus, Bell, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useAppStore } from '@/store/useAppStore'
-import { checkHealth, type BackendHealth } from '@/lib/api'
+import { checkHealth, STRICT_MATLAB_MODE, type BackendHealth } from '@/lib/api'
 import { CURRENT_DOCTOR } from '@/lib/demoData'
 import { cn } from '@/lib/utils'
 
@@ -70,18 +70,36 @@ export function Topbar({
                 'hidden items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium md:flex',
                 isLive
                   ? 'border-safe/30 bg-safe/10 text-safe'
-                  : 'border-warn/30 bg-warn/10 text-warn',
+                  : STRICT_MATLAB_MODE
+                    ? 'border-destructive/30 bg-destructive/10 text-destructive'
+                    : 'border-warn/30 bg-warn/10 text-warn',
               )}
             >
               <Cpu className="h-3.5 w-3.5" />
-              {isLive ? 'MATLAB engine' : 'Demo simulation'}
-              <span className={cn('h-1.5 w-1.5 rounded-full', isLive ? 'bg-safe' : 'bg-warn', 'animate-pulse-ring')} />
+              {isLive
+                ? 'MATLAB engine'
+                : STRICT_MATLAB_MODE
+                  ? 'MATLAB required (offline)'
+                  : 'Demo simulation'}
+              <span
+                className={cn(
+                  'h-1.5 w-1.5 rounded-full',
+                  isLive
+                    ? 'bg-safe'
+                    : STRICT_MATLAB_MODE
+                      ? 'bg-destructive'
+                      : 'bg-warn',
+                  'animate-pulse-ring',
+                )}
+              />
             </div>
           </TooltipTrigger>
           <TooltipContent>
             {isLive
               ? `Live inference · ${health?.engine} · ${health?.modelVersion}`
-              : 'MATLAB backend not reachable — running the deterministic clinical simulation with the frozen ensemble config.'}
+              : STRICT_MATLAB_MODE
+                ? 'Strict MATLAB mode active: MATLAB REST backend (port 8080) is required for inference.'
+                : 'MATLAB backend not reachable — running the deterministic clinical simulation with the frozen ensemble config.'}
           </TooltipContent>
         </Tooltip>
 

@@ -253,3 +253,68 @@ npx playwright test
 | Vite `Unsupported engine` | Node too old | Node ≥ 20.19 |
 | Port 8080 busy | Old server running | Ctrl+C it, or use another port |
 | `npm install` copied and failing | `node_modules` copied across machines | Delete it, `npm install` fresh |
+
+---
+
+## 10. 1-Click Local Launchers
+
+For fast demonstration without typing commands, use the included 1-click launchers in the repository root:
+
+- **Windows:** Double-click `launch_local.bat`
+- **macOS / Linux:** Run `./launch_local.sh`
+
+The launcher automatically:
+1. Checks dependencies and builds `dist/` if missing.
+2. Lets you choose between:
+   - `[1] Standalone Web App` (runs instant demo on `http://localhost:4173`, no MATLAB required)
+   - `[2] Live MATLAB Engine + Unified Web App` (serves app and AI backend on `http://localhost:8080`)
+   - `[3] Developer Mode` (Vite dev server on `http://localhost:5173`)
+3. Automatically opens your default web browser.
+
+---
+
+## 11. Free Cloud Deployment (Vercel) — Best for Hackathon Judges & Evaluators
+
+The clinician portal has a built-in, deterministic clinical simulation engine (`mockEngine.ts`) with frozen ensemble statistics. This allows deploying a **100% functional, responsive public demo** to Vercel in 2 minutes for free.
+
+Judges can open the URL on phones, tablets, or laptops, test fundus uploads, run the 9-stage pipeline, explore Grad-CAM++ heatmaps, simulate clinic throughput with the digital twin, and print clinical reports.
+
+### Deployment Steps (via Vercel UI):
+1. Push your repository to GitHub: `https://github.com/SarveshJr/RetinoXAI`.
+2. Go to [vercel.com](https://vercel.com) and log in.
+3. Click **"Add New..."** → **"Project"** and select `RetinoXAI`.
+4. In the Project Configuration:
+   - **Framework Preset:** `Vite`
+   - **Root Directory:** Click *Edit* and select `prototype/frontend`
+   - **Build Command:** `npm run build` (default)
+   - **Output Directory:** `dist` (default)
+5. Click **Deploy**. In ~60 seconds, your site is live at `https://retinoxai-xxx.vercel.app`!
+
+*Note: The included `vercel.json` already contains the SPA routing rewrites.*
+
+---
+
+## 12. Hybrid Cloud + Live AI Demo (Vercel Frontend + Tunnel to Local MATLAB)
+
+If you want the deployed Vercel site to execute **real-time MATLAB deep learning inference** from your laptop during a live hackathon presentation:
+
+1. Start your MATLAB backend locally:
+   ```matlab
+   cd prototype/backend
+   RetinoXAIServer(8080)
+   ```
+2. Open a secure public HTTPS tunnel to port 8080 using either Cloudflare Tunnel or ngrok:
+   ```bash
+   # Option A: Cloudflare Tunnel (100% free, no account needed)
+   npx cloudflared tunnel --url http://127.0.0.1:8080
+
+   # Option B: ngrok
+   ngrok http 8080
+   ```
+   Copy the generated HTTPS URL (e.g. `https://random-subdomain.trycloudflare.com`).
+3. Set the environment variable in Vercel:
+   - Go to **Vercel Project Settings ▸ Environment Variables**.
+   - Add: `VITE_API_BASE` = `https://<your-tunnel-subdomain>.trycloudflare.com/api`
+   - Redeploy the project.
+4. Refresh your Vercel URL: the top indicator badge will turn **green ("MATLAB engine")** and live inference will route straight to your laptop's MATLAB engine!
+
